@@ -41,6 +41,18 @@
         <input type="radio" name="sex" value="男" @if($userRec->sex=='男') checked @endif />男&nbsp;&nbsp;&nbsp;&nbsp;
         <input type="radio" name="sex" value="女" @if($userRec->sex=='女') checked @endif/>女
        </li>
+       <li>
+        <span class="item_name" style="width:120px;" >分组：</span>
+        <select name="groupid">
+            @foreach($groups as $group)
+              @if($userRec->group_id == $group->id)
+              <option value="{{$group->id}}" selected>{{$group->title}}</option>
+              @else
+               <option value="{{$group->id}}" >{{$group->title}}</option>
+              @endif
+            @endforeach
+        </select>
+       </li>
         <li>
         <span class="item_name" style="width:120px;"></span>
         <input type="submit" class="link_btn"/>

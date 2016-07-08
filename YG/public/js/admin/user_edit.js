@@ -1,5 +1,5 @@
 
-  flag=false;
+  flag=true;
 document.add.name.onblur = function() {
     var name = this.value;
     var name_error = document.getElementById("name_error");

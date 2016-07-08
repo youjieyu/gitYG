@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use DB,
     Session,Hash;
 
-class UserController extends CommonController {
+class UserController extends Controller {
 
     /**
      * Display a listing of the resource.
@@ -21,11 +21,17 @@ class UserController extends CommonController {
      // if(!empty($request($keyword))){
         $key= empty($request->get("key"))? "name":$request->get("key");
         
-      $users = DB::table("user")->orderBy("id", "DESC")
-               ->where($key,"LIKE","%".$request->get("keyword")."%")
+      $users = DB::table("user")
+               ->leftJoin("group_access","user.id","=","group_access.id")
+               ->where("user.".$key,"LIKE","%".$request->get("keyword")."%")
+               ->orderBy("user.id", "DESC")
                ->paginate(5);
+      //dd($users);
+      
         $keyword=$request->get("keyword");
-       return view("admin.user.index", ["users" => $users,"keyword"=>$keyword,"key"=>$key]);
+        //查询所有的分组
+        $groups=DB::table("group")->get();
+       return view("admin.user.index", ["users" => $users,"keyword"=>$keyword,"key"=>$key,"groups"=>$groups]);
      // }else{
        //    $users = DB::table("user")->orderBy("id", "DESC")->paginate(5);
       
@@ -38,7 +44,9 @@ class UserController extends CommonController {
      * 
      * */
     public function add() {
-        return view("admin.user.add");
+        //查询所有分组
+        $groups=DB::table("group")->get();
+        return view("admin.user.add",compact("groups"));
     }
 
     /**
@@ -63,7 +71,7 @@ class UserController extends CommonController {
      * 
      * */
     public function insert(Request $request){
-        $data=$request->except("_token","regpassword");
+        $data=$request->except("_token","regpassword","groupid");
         
         $data['password']=Hash::make($data['password']);
         $data['addtime']=date("Y-m-d");
@@ -74,9 +82,12 @@ class UserController extends CommonController {
 //            echo json_encode(array("status"=>0,"info"=>"添加失败"));
 //        }
         if(false!==$lastInsertId){
-            return redirect("Admin/user");
+            //将新增用户 添加到对应的分组里面
+            DB::table("group_access")->insert(["id"=>$lastInsertId,"group_id"=>$request->get("groupid")]);
+            echo "<script>alert('添加成功');window.location.href='/Admin/user'</script>";
         }else{
-           return back()->with(["info" => "添加用户失败"]);
+            
+          echo "<script>alert('添加失败');window.location.href='/Admin/user'</script>";
         }
     }
 
@@ -97,9 +108,8 @@ class UserController extends CommonController {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id) {
-        //
-    }
+  
+    
 
     /**
      * Show the form for editing the specified resource.
@@ -109,10 +119,14 @@ class UserController extends CommonController {
      */
     public function edit($id) {
         //查询该用户记录
-        $userRec=DB::table("user")->where("id",$id)->first();
-        
+        $userRec=DB::table("user")
+                ->leftJoin("group_access","user.id","=","group_access.id")
+                ->where("user.id",$id)
+                ->first();
+        //查询所有分组
+          $groups=DB::table("group")->get();
         //显示模板
-        return view("admin.user.edit",compact("userRec"));
+        return view("admin.user.edit",["userRec"=>$userRec,"groups"=>$groups]);
     }
 
     /**
@@ -124,14 +138,18 @@ class UserController extends CommonController {
      */
     public function update(Request $request, $id) {
         //
-        $data=$request->except("_token","regpassword","_method");
+        
+        $data=$request->except("_token","regpassword","_method","groupid");
         if(!empty($data['password'])){
              $data['password']=Hash::make($data['password']);
         }else{
              unset($data['password']);
         }
-        if(false!=$affectedRows=DB::table("user")->where("id",$id)->update($data)){
-            return redirect("/Admin/user");
+        if(false!==$affectedRows=DB::table("user")->where("id",$id)->update($data)){
+             $afft=DB::table("group_access")->where("id",$id)->update(["group_id"=>$request->get("groupid")]);
+            echo "<script>alert('修改成功');window.location.href='/Admin/user'</script>";
+        }else{
+            echo "<script>alert('修改失败');window.location.href='/Admin/user'</script>";
         }
     }
 
@@ -144,9 +162,9 @@ class UserController extends CommonController {
     public function destroy($id) {
         //删除用户
         if(false!==DB::table("user")->where("id",$id)->delete()){
-           echo json_encode(array("info"=>"删除成功"));
+            echo "<script>alert('删除成功');window.location.href='/Admin/user'</script>";
         }else{
-            echo json_encode(array("info"=>"删除失败"));
+            echo "<script>alert('删除失败');window.location.href='/Admin/user'</script>";
         }
         
     }
@@ -177,4 +195,19 @@ class UserController extends CommonController {
         return response()->json(array("status" => 1, "info" => "/uploads/avartar/" . $rename));
     }
 
+    
+    /**
+     * ajax请求过来 修改对应分组
+     * @param \Illuminate\Http\Request $requset
+     */
+    public function show(Request $request)
+    {
+      // dd(1);
+        if(false !== DB::table("group_access")->where("id",$request->get("id"))->update(["group_id"=>$request->get("groupid")])){
+            return response()->json(["status"=>1,"info"=>"修改分组成功"]);
+        }else{
+            return response()->json(["status"=>0,"info"=>"修改分组失败"]);
+        }
+    }
+    
 }

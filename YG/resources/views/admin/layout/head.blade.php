@@ -5,10 +5,10 @@
 <title>后台管理系统</title>
 <meta name="author" content="YJY" />
 <link rel="stylesheet" type="text/css" href="/css/admin/style.css">
-<!--[if lt IE 9]>
-<script src="js/html5.js"></script>
-<![endif]-->
-<script src="/js/admin/jquery.js"></script>
+
+
+
+
 <script src="/js/admin/jquery.mCustomScrollbar.concat.min.js"></script>
 <script>
 
@@ -39,12 +39,13 @@
 <header>
  <h1><img src="/images/admin_logo.png"/></h1>
  <ul class="rt_nav">
-
+<script src="/js/admin/jquery.js"></script>
   
-  <li><a href="/Admin" class="admin_icon">DeathGhost</a></li>
+  <li><a href="/Admin" class="admin_icon">{{Session::get("userData")->nickname}}</a></li>
   <li><a href="#" class="set_icon">账号设置</a></li>
   <li><a href="/Admin/login/loginout" class="quit_icon">安全退出</a></li>
  </ul>
+ 
 </header>
 <!--aside nav-->
 <!--aside nav-->
@@ -56,15 +57,14 @@
     <dt>用户模块</dt>
     <!--当前链接则添加class:active-->
     <dd><a href="/Admin/user" class="active">用户列表</a></dd>
-    <dd><a href="/Admin/add">添加用户</a></dd>
-    <dd><a href="recycle_bin.html"></a></dd>
+    <dd><a href="/Admin/add" class="active">添加用户</a></dd>
    </dl>
   </li>
   <li>
    <dl>
-    <dt>订单信息</dt>
-    <dd><a href="order_list.html"></a></dd>
-    <dd><a href="order_detail.html"></a></dd>
+    <dt>角色管理</dt>
+    <dd><a href="/Admin/group" class="active">分组列表</a></dd>
+    <dd><a href="" class="active">添加分组</a></dd>
    </dl>
   </li>
   <li>

@@ -35,6 +35,14 @@
         <input type="text" name="phone" class="textbox textbox_295" placeholder="用户手机..."/>
         <span class="errorTips" style="display:none" id="phone_error"></span>
        </li>
+       <li>
+        <span class="item_name" style="width:120px;">分组:</span>
+        <select name="groupid">
+            @foreach($groups as $group)
+             <option value="{{$group->id}}">{{$group->title}}</option>
+            @endforeach
+        </select>
+       </li>
         <li>
         <span class="item_name" style="width:120px;" >性别：</span>
         <input type="radio" name="sex" value="男" checked>男&nbsp;&nbsp;&nbsp;&nbsp;

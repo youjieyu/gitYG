@@ -1,5 +1,6 @@
 @include("admin.layout.head")
-<link type="text/css" href="/bootstrap/css/bootstrap.css">
+<link type="text/css" href="/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/css/admin/style.css">
 <section class="rt_wrap content mCustomScrollbar">
  <div class="rt_content">
       <div class="page_title">
@@ -24,41 +25,50 @@
         <th>用户头像</th>
         <th>用户昵称</th>
         <th>手机</th>
-       
         <th>创建时间</th>
+        <th>所属分组</th>
         <th>操作</th>
        </tr>
        
        @foreach($users as $user)
        <tr>
-        <td class="center" id='uid'>{{$user->id}}</td>
+        <td class="center" id="uid">{{$user->id}}</td>
         <td>{{$user->name}}</td>
         <td class="center"><img src="{{$user->avartar}}" width="50px" height="50px"></td>
         <td class="center">{{$user->nickname}}</td>
         <td class="center">{{$user->phone}}</td>
-      
-      
-       
         <td class="center">{{$user->addtime}}</td>
+        <td>
+            <select name="groupid" uid="{{$user->id}}">
+                @foreach($groups as $group)
+                  @if($user->group_id == $group->id)
+                    <option value="{{$group->id}}" selected>{{$group->title}}</option>
+                  @else
+                    <option value="{{$group->id}}" >{{$group->title}}</option>
+                  @endif
+                @endforeach
+            <select/>
+        </td>
         <td class="center">
          
          <a href="{{ url('/Admin/user/'.$user->id.'/edit') }}" title="编辑" class="link_icon">&#101;</a>
-         <a id='delete' title="删除" class="link_icon">&#100;</a>
+         <a  title="删除" class="link_icon" href="{{url('/Admin/user/delete/'.$user->id)}}">&#100;</a>
         </td>
        </tr>
       @endforeach
        
       </table>
-     <p>
-         {!!$users->render()!!}
+    <p >
+        
+         {!!$users->appends(["keyword"=>$keyword])->render()!!}
      </p>
  </div>
  <script>
-     document.getElementById("delete").onclick=function(){
+     var vido=function(id){
          var result = confirm("确认删除吗？");
         
          if(result==true){
-         var id=document.getElementById("uid").innerHTML;
+        
            var request = new XMLHttpRequest();
           request.onloadend = function () {
               var result = eval("(" + request.responseText + ")");
@@ -68,7 +78,10 @@
           request.open("get","/Admin/user/delete/"+id);
           request.send(null);
       }
-     }
+  }
  </script>
+  
+ <script src="/js/admin/user_index.js"></script>
+
 </section>
 @include("admin.layout.foot")
